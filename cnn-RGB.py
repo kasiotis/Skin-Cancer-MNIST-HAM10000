@@ -79,6 +79,7 @@ print('Summary: Loss over the test dataset: %.2f, Accuracy: %.2f' % (score[0], s
 # Saving the final model for RGB images
 model.save("trained-models/cnn-best-model-RGB.h5")
 
+
 # Plotting the accuracy of the model for each epoch
 plt.plot(history.history['accuracy'])
 plt.plot(history.history['val_accuracy'])
