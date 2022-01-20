@@ -34,7 +34,7 @@ sns.countplot(x='localization', data=df_metadata)
 plt.title('Disease localisation distribution')
 plt.show()
 
-# bla bla
+# Plotting the gender frequencies of the patients
 bar, ax = plt.subplots(figsize=(10, 10))
 plt.pie(df_metadata['sex'].value_counts(),
         labels = df_metadata['sex'].value_counts().index, autopct="%.1f%%")

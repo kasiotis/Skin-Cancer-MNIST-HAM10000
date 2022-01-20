@@ -1,10 +1,13 @@
 import pandas as pd
 import numpy as np
 import keras
+import time
 import tensorflow as tf
+import seaborn as sns
+import matplotlib.pyplot as plt
+import sklearn.metrics as metrics
 from keras.models import Sequential
 from keras.layers import LSTM, Dense,Dropout
-from keras.datasets import mnist
 from keras.utils import np_utils
 from imblearn.over_sampling import RandomOverSampler
 from sklearn.model_selection import train_test_split
@@ -54,6 +57,7 @@ print(x_test.shape[0], 'test samples')
 y_train = keras.utils.np_utils.to_categorical(y_train, num_classes)
 y_test = keras.utils.np_utils.to_categorical(y_test, num_classes)
 
+start = time.time()
 
 # Building LSTM network
 model = Sequential()
@@ -71,6 +75,31 @@ model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accur
 # Fitting the model
 history = model.fit(x_train, y_train, epochs=nb_epoch, batch_size=batch_size, callbacks=[callback], validation_split = 0.2)
 
+stop = time.time()
+
 # Evaluating the model
 score = model.evaluate(x_test, y_test, verbose=0)
 print('Summary: Loss over the test dataset: %.2f, Accuracy: %.2f' % (score[0], score[1]))
+
+print("Time to build and train the model is : ",(stop - start)/60, " minutes")
+
+# Setting up the variables require to created a confusion matrix
+y_pred = model.predict(x_test)
+y_pred_classes = np.argmax(y_pred, axis=1)
+y_true = np.argmax(y_test, axis =1)
+confusion_matrix = metrics.confusion_matrix(y_true=y_true, y_pred=y_pred_classes )
+
+# plotting the confusion matrix for the model label prediction
+ax = sns.heatmap(confusion_matrix, fmt='', cmap='Blues')
+ax.set_title('Confusion Matrix with labels\n');
+ax.set_xlabel('Predicted Labels')
+ax.set_ylabel('Actual Labels')
+plt.show()
+
+# plotting the incorrect prediction fraction of each class label
+label_frac_error = 1 - np.diag(confusion_matrix) / np.sum(confusion_matrix, axis=1)
+plt.bar(np.arange(7),label_frac_error)
+plt.title('Incorrect prediction fraction of labels')
+plt.xlabel('True Label')
+plt.ylabel('Fraction classified incorrectly')
+plt.show()

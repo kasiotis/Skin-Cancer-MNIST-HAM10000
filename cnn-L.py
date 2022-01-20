@@ -2,10 +2,11 @@
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
-import os
+import time
 import pandas as pd
 import tensorflow as tf
 import keras
+import sklearn.metrics as metrics
 from imblearn.over_sampling import RandomOverSampler
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten
@@ -53,6 +54,8 @@ x_train, x_test, y_train, y_test = train_test_split(images, labels, random_state
 y_train = keras.utils.np_utils.to_categorical(y_train, num_classes)
 y_test = keras.utils.np_utils.to_categorical(y_test, num_classes)
 
+start = time.time()
+
 # Model building
 model = Sequential()
 model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=(img_rows, img_cols, 1)))
@@ -73,13 +76,12 @@ model.compile(loss=keras.losses.categorical_crossentropy, optimizer='adam', metr
 # Fitting the model
 history = model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_split=0.2, callbacks=[callback])
 
+stop = time.time()
+
 # Evaluating the model
 score = model.evaluate(x_test, y_test, verbose=0)
 print('Summary: Loss over the test dataset: %.2f, Accuracy: %.2f' % (score[0], score[1]))
-
-# Saving the final model for greyscale images
-model.save("trained-models/cnn-best-model-L.h5")
-
+print("Time to build and train the model is : ",(stop - start)/60, " minutes")
 
 # Plotting the accuracy of the model for each epoch
 plt.plot(history.history['accuracy'])
@@ -97,4 +99,25 @@ plt.title('model loss')
 plt.xlabel('epoch')
 plt.ylabel('loss')
 plt.legend(['train', 'val'], loc='upper left')
+plt.show()
+
+# Setting up the variables require to created a confusion matrix
+y_pred = model.predict(x_test)
+y_pred_classes = np.argmax(y_pred, axis=1)
+y_true = np.argmax(y_test, axis =1)
+confusion_matrix = metrics.confusion_matrix(y_true=y_true, y_pred=y_pred_classes )
+
+# plotting the confusion matrix for the model label prediction
+ax = sns.heatmap(confusion_matrix, fmt='', cmap='Blues')
+ax.set_title('Confusion Matrix with labels\n');
+ax.set_xlabel('Predicted Labels')
+ax.set_ylabel('Actual Labels')
+plt.show()
+
+# plotting the incorrect prediction fraction of each class label
+label_frac_error = 1 - np.diag(confusion_matrix) / np.sum(confusion_matrix, axis=1)
+plt.bar(np.arange(7),label_frac_error)
+plt.title('Incorrect prediction fraction of labels')
+plt.xlabel('True Label')
+plt.ylabel('Fraction classified incorrectly')
 plt.show()
