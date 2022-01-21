@@ -86,7 +86,7 @@ print("Time to build and train the model is : ",(stop - start)/60, " minutes")
 # Plotting the accuracy of the model for each epoch
 plt.plot(history.history['accuracy'])
 plt.plot(history.history['val_accuracy'])
-plt.title('model accuracy')
+plt.title('CNN-RGB accuracy')
 plt.xlabel('epoch')
 plt.ylabel('accuracy')
 plt.legend(['train', 'val'], loc='upper left')
